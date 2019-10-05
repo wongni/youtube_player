@@ -54,6 +54,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player.*;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
@@ -516,6 +517,11 @@ public class YoutubePlayerPlugin implements MethodCallHandler {
             exoPlayer.seekTo(location);
         }
 
+        void setPlaybackRate(double value) {
+            float bracketedValue = (float) Math.max(0.5, Math.min(2.0, value));
+            exoPlayer.setPlaybackParameters(new PlaybackParameters(bracketedValue));
+        }
+
         long getPosition() {
             return exoPlayer.getCurrentPosition();
         }
@@ -710,6 +716,10 @@ public class YoutubePlayerPlugin implements MethodCallHandler {
             case "seekTo":
                 int location = ((Number) call.argument("location")).intValue();
                 player.seekTo(location);
+                result.success(null);
+                break;
+            case "setPlaybackRate":
+                player.setPlaybackRate((Double) call.argument("playbackRate"));
                 result.success(null);
                 break;
             case "position":

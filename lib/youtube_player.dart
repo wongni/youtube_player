@@ -71,6 +71,7 @@ class VideoPlayerValue {
     this.isLooping = false,
     this.isBuffering = false,
     this.volume = 1.0,
+    this.playbackRate = 1.0,
     this.errorDescription,
   });
 
@@ -107,6 +108,9 @@ class VideoPlayerValue {
   /// If [hasError] is false this is [null].
   final String errorDescription;
 
+  /// The current rate (speed) of the playback.
+  final double playbackRate;
+
   /// The [size] of the currently loaded video.
   ///
   /// Is null when [initialized] is false.
@@ -128,6 +132,7 @@ class VideoPlayerValue {
     bool isBuffering,
     double volume,
     String errorDescription,
+    double playbackRate,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -139,6 +144,7 @@ class VideoPlayerValue {
       isBuffering: isBuffering ?? this.isBuffering,
       volume: volume ?? this.volume,
       errorDescription: errorDescription ?? this.errorDescription,
+      playbackRate: this.playbackRate,
     );
   }
 
@@ -430,6 +436,23 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       'location': moment.inMilliseconds,
     });
     value = value.copyWith(position: moment);
+  }
+
+  /// Sets the playback rate of [this].
+  ///
+  /// [playbackRate] indicates a value between 0.5 (50% speed) and 2.0
+  /// (200% speed) on a linear scale.
+  Future<void> setPlaybackRate(double playbackRate) async {
+    if (_isDisposed) {
+      return;
+    }
+    // https://github.com/flutter/flutter/issues/26431
+    // ignore: strong_mode_implicit_dynamic_method
+    await _channel.invokeMethod('setPlaybackRate', <String, dynamic>{
+      'textureId': _textureId,
+      'playbackRate': playbackRate,
+    });
+    value = value.copyWith(playbackRate: playbackRate);
   }
 
   /// Sets the audio volume of [this].
